@@ -46,7 +46,7 @@ const ManageAccount = () => {
         await deleteDoc(doc(db, 'BD', user.uid));
         await deleteUser(user);
         Alert.alert('Éxito', 'Cuenta eliminada correctamente.');
-        router.replace('/loginn/login');
+        router.replace('/login/login');
       }
     } catch (error) {
       console.error('Error al eliminar la cuenta:', error);
@@ -58,7 +58,7 @@ const ManageAccount = () => {
   const handleLogout = () => {
     auth.signOut();
     Alert.alert('Cierre de Sesión', 'Sesión cerrada correctamente.');
-    router.replace('/loginn/login');
+    router.replace('/login/login');
   };
 
   // Renderizado del modal de settings

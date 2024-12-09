@@ -2,45 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
-import * as Notifications from 'expo-notifications'; // Importar notificaciones
-import '../backgroundtask'; // Importa el archivo de tareas en segundo plano
 
 const SplashScreen = () => {
   const router = useRouter();
-  const [isConnected, setIsConnected] = useState<boolean | null>(null); // Estado para la conexión a Internet
-
-  // Configuración inicial de notificaciones
-  useEffect(() => {
-    const setupNotifications = async () => {
-      // Solicitar permisos de notificaciones
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(
-          'Permiso denegado',
-          'No se podrán enviar notificaciones sin los permisos necesarios.'
-        );
-        return;
-      }
-
-      // Configuración de notificaciones
-      Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-          shouldShowAlert: true,
-          shouldPlaySound: false,
-          shouldSetBadge: false,
-        }),
-      });
-
-      console.log('Notificaciones configuradas');
-    };
-
-    setupNotifications();
-  }, []);
-
+  const [isConnected, setIsConnected] = useState(true); // Estado para la conexión a Internet
   useEffect(() => {
     // Detectar cambios en la conexión a Internet
     const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsConnected(state.isConnected);
+      setIsConnected(state.isConnected || false); // Asegúrate de manejar el caso undefined
+    });
+
+    // Verificar conexión al cargar la pantalla
+    NetInfo.fetch().then((state) => {
+      setIsConnected(state.isConnected || false); // Maneja posibles valores undefined
       if (!state.isConnected) {
         Alert.alert(
           'Sin conexión',
@@ -49,32 +23,23 @@ const SplashScreen = () => {
       }
     });
 
+    // Timer para avanzar al login solo si hay conexión
+    const timer = setTimeout(() => {
+      if (isConnected) {
+        router.push('./login/login'); // Redirige al login
+      }
+    }, 3000); // 3 segundos
+
     return () => {
+      clearTimeout(timer);
       unsubscribe(); // Limpia el listener de NetInfo
     };
-  }, []);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
-
-    if (isConnected) {
-      // Navegar al login después de 3 segundos si hay conexión
-      timer = setTimeout(() => {
-        router.push('./loginn/login');
-      }, 3000);
-    }
-
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-  }, [isConnected, router]);
+  }, [router, isConnected]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bienvenido a Lightbulb</Text>
-      {isConnected === false && (
+      {!isConnected && (
         <Text style={styles.errorText}>
           Sin conexión a Internet. Conéctate para continuar.
         </Text>

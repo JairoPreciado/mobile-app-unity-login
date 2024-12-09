@@ -47,7 +47,7 @@ const RegisterStep2 = () => {
       });
 
       Alert.alert('Éxito', 'Cuenta creada exitosamente.');
-      router.push('/loginn/login');
+      router.push('/login/login');
     } catch (error) {
       console.error('Error creando la cuenta:', error);
       Alert.alert('Error', 'No se pudo crear la cuenta. Inténtalo de nuevo.');
