@@ -45,7 +45,7 @@ const LoginScreen = () => {
       const user = userCredential.user;
 
       // Obtiene el nombre del usuario desde Firestore
-      const userDocRef = doc(db, 'BD', user.uid);
+      const userDocRef = doc(db, 'DB', user.uid);
       const userDoc = await getDoc(userDocRef);
 
       // Mensaje de bienvenida en consecuencia al nombre con el que se registro el usuario
@@ -68,7 +68,7 @@ const LoginScreen = () => {
     <View style={styles.container}>
 
       {/* Titulo de la vista */}
-      <Text style={styles.title}>Lightbulb</Text>
+      <Text style={styles.title}>Instalaciones Electricas</Text>
       
       {/* Input para ingresar el correo */}
       <TextInput style={styles.input} placeholder="Correo" value={email} onChangeText={setEmail} maxLength={50} keyboardType="email-address"/>

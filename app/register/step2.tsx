@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import Checkbox from 'expo-checkbox';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { setDoc, doc } from 'firebase/firestore';
@@ -8,8 +9,21 @@ import { auth, db } from '../../firebaseConfiguration'; // Ajusta la ruta según
 
 const RegisterStep2 = () => {
   const router = useRouter();
-  const params = useLocalSearchParams();
-  const email = Array.isArray(params.email) ? params.email[0] : params.email; // Asegúrate de que sea una cadena
+  const [email, setEmail] = useState<string | null>(null);
+
+  // Verificación de correo electrónico en AsyncStorage
+  useEffect(() => {
+    const fetchEmail = async () => {
+      const storedEmail = await AsyncStorage.getItem('email');
+      if (storedEmail && isValidEmail(storedEmail)) {
+        setEmail(storedEmail);
+      } else {
+        router.replace('/register/step1'); // Redirige a step1 si no hay correo válido
+      }
+    };
+    fetchEmail();
+  }, []);
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
@@ -23,6 +37,11 @@ const RegisterStep2 = () => {
   const isNameValid = name.trim().length > 0; // El nombre no puede estar vacío
   // Verifica que el formulario tenga la informacion necesaria
   const isFormValid = isPasswordValid && isConfirmPasswordValid && isNameValid;
+
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Expresión para validar correos básicos
+    return emailRegex.test(email);
+  };
 
   // Funcion para ingresar datos de la cuenta a la BD
   const handleCreateAccount = async () => {
@@ -41,7 +60,7 @@ const RegisterStep2 = () => {
       const user = userCredential.user;
 
       // Guarda los datos en Firestore
-      await setDoc(doc(db, 'BD', user.uid), {
+      await setDoc(doc(db, 'DB', user.uid), {
         email,
         name,
       });
@@ -56,7 +75,6 @@ const RegisterStep2 = () => {
 
   return (
     <View style={styles.container}>
-      
       {/* Titulo de la vista */}
       <Text style={styles.title}>Crear Cuenta</Text>
 
@@ -156,7 +174,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   disabledButton: {
-        backgroundColor: '#d3d3d3', // Color gris cuando está deshabilitado
+    backgroundColor: '#d3d3d3', // Color gris cuando está deshabilitado
   }
 });
 

@@ -22,7 +22,7 @@ const RecoveryPassword = () => {
   // Función para verificar si el correo existe en Firebase
   const checkEmailExists = async (email: string): Promise<boolean> => {
     try {
-      const usersRef = collection(db, 'BD'); // Cambia 'BD' por tu colección
+      const usersRef = collection(db, 'DB'); // Cambia 'BD' por tu colección
       const q = query(usersRef, where('email', '==', email));
       const querySnapshot = await getDocs(q);
 

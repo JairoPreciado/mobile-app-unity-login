@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity } fr
 import { useRouter } from 'expo-router';
 import { collection, query, where, getDocs } from 'firebase/firestore'; // Firebase Firestore
 import { db } from '../../firebaseConfiguration'; // Ajusta la ruta según tu estructura
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RegisterStep1 = () => {
   const router = useRouter();
@@ -17,9 +18,6 @@ const RegisterStep1 = () => {
   // Dominios comunes válidos (puedes agregar más si lo deseas)
   const validDomains = [
     'gmail.com',
-    'yahoo.com',
-    'hotmail.com',
-    'outlook.com',
     'ucol.mx',
   ];
 
@@ -35,7 +33,7 @@ const RegisterStep1 = () => {
   // Función para verificar si el correo ya está registrado
   const checkEmailExists = async (email:string) => {
     try {
-      const usersRef = collection(db, 'BD'); // Colección donde guardas usuarios
+      const usersRef = collection(db, 'DB'); // Colección donde guardas usuarios
       const q = query(usersRef, where('email', '==', email));
       const querySnapshot = await getDocs(q);
 
@@ -92,8 +90,10 @@ const RegisterStep1 = () => {
   };
 
   // Verificar el código ingresado
-  const handleVerifyCode = () => {
+  const handleVerifyCode = async () => {
     if (inputCode === verificationCode) {
+      // Guardar el correo en AsyncStorage despues de verificar el código
+      await AsyncStorage.setItem('userEmail', email);
       Alert.alert('Éxito', 'Correo verificado!');
       router.push({
         pathname: './step2',
@@ -128,7 +128,7 @@ const RegisterStep1 = () => {
       </TouchableOpacity>
 
       {/* Botón de regresar */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.push({pathname:'../login/login'})}>
         <Text style={styles.backButtonText}>←</Text>
       </TouchableOpacity>
 
